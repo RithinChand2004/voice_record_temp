@@ -1,0 +1,4 @@
+streamlit == 1.24.1
+PyAudio == 0.2.13
+Wave == 0.0.2
+dropbox == 11.36.2
