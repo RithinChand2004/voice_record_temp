@@ -1,33 +1,34 @@
 import streamlit as st
-import pyaudio
-import wave
+from scipy.io.wavfile import write
+import wavio as wv
+import sounddevice as sd
+#import wave
 import dropbox
 import os
 
+def record_audio(filename, duration=5):
+    fs = 44100  # Sample rate
+    seconds = duration  # Duration of recording
 
-# ... Code for recording audio from the previous example ...
-def record_audio(filename, duration, sample_rate=44100, chunk=1024):
-    audio = pyaudio.PyAudio()
-    stream = audio.open(format=pyaudio.paInt16,
-                        channels=1,
-                        rate=sample_rate,
-                        input=True,
-                        frames_per_buffer=chunk)
+    st.write("Recording...")
+    audio_data = sd.rec(int(fs * seconds), samplerate=fs, channels=2)
+    sd.wait()  # Wait until recording is finished
+
+    # with wave.open(filename, "wb") as wf:
+    #     wf.setnchannels(2)
+    #     wf.setsampwidth(2)
+    #     wf.setframerate(fs)
+    #     wf.writeframes(audio_data.tobytes())
     
-    frames = []
-    for i in range(0, int(sample_rate / chunk * duration)):
-        data = stream.read(chunk)
-        frames.append(data)
+    # This will convert the NumPy array to an audio
+	# file with the given sampling frequency
+    write(filename, fs, audio_data)
 
-    stream.stop_stream()
-    stream.close()
-    audio.terminate()
+	# Convert the NumPy array to audio file
+    wv.write(filename, audio_data, fs, sampwidth=2)
+    st.write("Finished recording")
 
-    with wave.open(filename, 'wb') as wf:
-        wf.setnchannels(1)
-        wf.setsampwidth(audio.get_sample_size(pyaudio.paInt16))
-        wf.setframerate(sample_rate)
-        wf.writeframes(b''.join(frames))
+    
 
 def upload_to_dropbox(filename, access_token, dropbox_folder="/Audio_Recordings/"):
     dbx = dropbox.Dropbox(access_token)
@@ -41,9 +42,20 @@ def upload_to_dropbox(filename, access_token, dropbox_folder="/Audio_Recordings/
     except dropbox.exceptions.ApiError as e:
         st.write(f"Error uploading audio to Dropbox: {e}")
 
+# def main():
+#     st.title("Audio Recorder and Uploader")
+#     st.write("Click the 'Record' button to start recording audio for 5 seconds.")
+    
+#     if st.button("Record"):
+#         record_audio("output.wav", duration=5)
+
+#     if st.button("Stop Recording"):
+#         st.write("Stopped Recording")
+#         upload_to_dropbox("output.wav", "YOUR_DROPBOX_ACCESS_TOKEN")
+
 def main():
     # ... Code for the Streamlit app from the previous example ...
-    access_token = "sl.BjSFfvfGR2Dn4hNtmKB2h-BGoXydjFVTr9a3U-xBpBlNgXBTZZjWFWWDvdUYWmQXRiTn9E2syS2DOXFhH5UPkOTDk7V5UjdZli5YqqqHRhAKGGBcu7GEx8a2OOjAG2CI9ttWLHC7CP0AV7F3wYyZBgA"
+    access_token = "sl.BjUcmiCTA_UCfCfV2dj1p-n3brEk6ekA1Qf9jHjD3yLmK6NqaguX8z2YqCBu8BJvQXQ3pwkSGYqHVLdx86dH0urpELjcFrKH1DoRNvNe14la1W2VgP-6ltwcReSlJ3xgOREfJ_CuzJ5QMF5igm-Se2c"
 
     st.title("Audio Recorder")
     st.write("How to use: Enter a name for the audio file (Make sure u enter unique name every time u start recording), then click 'Start Recording'. When you are done recording, click 'Upload to Dropbox'.")
