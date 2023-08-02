@@ -9,9 +9,17 @@ import os
 def record_audio(filename, duration=5):
     fs = 44100  # Sample rate
     seconds = duration  # Duration of recording
+    
+    devices = sd.query_devices()
+    for i, device in enumerate(devices):
+        print(i, device['name'])
+
+    input_device_index = 0  # Replace with the index of your desired input device
+    audio_data = sd.rec(int(fs * seconds), samplerate=fs, channels=2, device=input_device_index)
+
 
     st.write("Recording...")
-    audio_data = sd.rec(int(fs * seconds), samplerate=fs, channels=2)
+    # audio_data = sd.rec(int(fs * seconds), samplerate=fs, channels=2)
     sd.wait()  # Wait until recording is finished
 
     # with wave.open(filename, "wb") as wf:
