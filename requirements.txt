@@ -3,3 +3,4 @@ scipy==1.10.0
 sounddevice==0.4.6
 dropbox==11.36.2
 wavio
+PortAudio
